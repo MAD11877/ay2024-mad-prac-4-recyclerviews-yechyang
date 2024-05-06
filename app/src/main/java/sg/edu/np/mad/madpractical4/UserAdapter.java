@@ -13,42 +13,51 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.List;
 
 public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
     private ArrayList<User> data;
     private Context context;
+    private List<Integer> randomNumbers;
 
     // Constructor accepting data list
     public UserAdapter(ArrayList<User> input, Context context) {
         this.data = input;
         this.context = context;
+        this.randomNumbers = new ArrayList<>(data.size());
+        for (int i = 0; i < data.size(); i++) {
+            randomNumbers.add(null); // Use null to signify uninitialized values
+        }
     }
-
-    // Correct implementation of onCreateViewHolder
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//        View item = LayoutInflater.from(parent.getContext())
-//                .inflate(R.layout.custom_activity_list, parent, false); // Inflate custom layout
-        View item;
-        if (viewType == 1) {
-            item = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.custom_activity_list_ending_7, parent, false);
-        } else {
-            // Default layout for other names
-            item = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.custom_activity_list, parent, false);
+        int layoutResource;
+        // Check if the position is an even or odd index and determine the correct layout
+        if (viewType == 1) { // Layout when the random number ends with 7
+            layoutResource = R.layout.custom_activity_list_ending_7; // Your custom layout for condition 7
+        } else { // Default layout
+            layoutResource = R.layout.custom_activity_list;
         }
-        return new UserViewHolder(item); // Correct ViewHolder type
+
+        View item = LayoutInflater.from(parent.getContext())
+                .inflate(layoutResource, parent, false);
+
+        return new UserViewHolder(item);
     }
 
     @Override
     public int getItemViewType(int position) {
-        String name = data.get(position).name;
-        char lastChar = name.charAt(name.length() - 1); // Get the last character
-        if (lastChar == '7') { // Correctly check if it's '7'
-            return 1; // Return view type for custom layout
+        // Check if we already have a random number for this position
+        if (randomNumbers.get(position) == null) {
+            Random random = new Random();
+            int randomNumber = random.nextInt(1000000) + 1; // Generate a new random number
+            randomNumbers.set(position, randomNumber); // Store the generated random number
         }
-        return 0; // Default view type
+
+        int randomNumber = randomNumbers.get(position);
+
+        // If the last digit is 7, return a specific view type, otherwise the default
+        return (randomNumber % 10 == 7) ? 1 : 0;
     }
 
     public void onBindViewHolder(
@@ -56,8 +65,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
             int position) {
         User s = data.get(position);
 
-        Random random = new Random();
-        int randomNumber = random.nextInt(1000000) + 1;
+        int randomNumber = randomNumbers.get(position);
         String nameWithRandom = s.name + randomNumber;
         holder.txtName.setText(nameWithRandom);
         holder.txtDescription.setText(s.description);
