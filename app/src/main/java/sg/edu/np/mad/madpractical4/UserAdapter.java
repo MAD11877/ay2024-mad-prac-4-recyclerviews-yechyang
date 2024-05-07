@@ -28,9 +28,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder>{
         User list_items = list_objects.get(position);
         holder.name.setText(list_items.getName());
         holder.description.setText(list_items.getDescription());
-        Log.d(TAG, list_items.getName());
+        String name = list_items.getName();
+        int lastDigit = 0; // Default value
 
-        int lastDigit = Integer.parseInt(list_items.getName()) % 10;
+        try {
+            // Assuming you're parsing the last character(s) to get a number.
+            lastDigit = Integer.parseInt(name.substring(name.length() - 1));
+        } catch (NumberFormatException e) {
+            // Handle invalid parsing.
+            Log.e(TAG, "Failed to parse integer from name: " + name, e);
+        }
         if (lastDigit == 7){
             holder.bigImage.setVisibility(View.VISIBLE);
         }
